@@ -85,7 +85,7 @@ public class MainApplication extends Application {
         }
 
         builder.setContentIntent(contentIntent)
-                .setSmallIcon(R.drawable.ic_launcher_foreground)
+                .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle("Получен Response")
                 .setContentText(response)
         .setDefaults( Notification.DEFAULT_SOUND |
