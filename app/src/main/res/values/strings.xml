@@ -1,0 +1,19 @@
+<resources>
+    <string name="app_name">UdpSender</string>
+    <string name="server_com_hint">IP Адрес</string>
+    <string name="sound_checkbox">ПРОИГРЫВАТЬ ЗВУК</string>
+    <string name="answer_title">ОТВЕТ:</string>
+    <string name="btn_start_title">ЗАПУСТИТЬ</string>
+    <string name="btn_stop_title">ОСТАНОВИТЬ</string>
+    <string name="ip_address">IP Адрес</string>
+    <string name="port">Порт</string>
+    <string name="interval">Интервал, сек</string>
+    <string name="message">Сообщение</string>
+    <string name="ip_blank">IP адрес не введен</string>
+    <string name="ip_pattern_incorrect">IP не верен</string>
+    <string name="port_empty">Порт не задан</string>
+    <string name="port_value_invalid">Введенный порт - не верен</string>
+    <string name="port_not_integer">Введенный порт невалиден</string>
+    <string name="title">UDP Sender</string>
+    <string name="wrong_interval">Введенный интервал не может быть меньше 2х секунд</string>
+</resources>
