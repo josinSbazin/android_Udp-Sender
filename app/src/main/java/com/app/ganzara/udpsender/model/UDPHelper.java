@@ -41,9 +41,4 @@ public class UDPHelper extends Thread {
         }
         return null;
     }
-
-    @Override
-    public void run() {
-
-    }
 }
