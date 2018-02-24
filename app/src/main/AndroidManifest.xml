@@ -19,7 +19,20 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <service android:name=".MainService" />
+        <service
+            android:name=".MainService"
+            android:enabled="true"
+            android:stopWithTask="false"/>
+
+        <!--<receiver-->
+            <!--android:name="com.app.ganzara.udpsender.SensorRestarterBroadcastReceiver"-->
+            <!--android:enabled="true"-->
+            <!--android:exported="true"-->
+            <!--android:label="RestartServiceWhenStopped">-->
+            <!--<intent-filter>-->
+                <!--<action android:name="uk.ac.shef.oak.ActivityRecognition.RestartSensor"/>-->
+            <!--</intent-filter>-->
+        <!--</receiver>-->
     </application>
 
 </manifest>
