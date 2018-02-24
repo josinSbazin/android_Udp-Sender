@@ -40,7 +40,8 @@ public class MainApplication extends Application {
 
     public void addResponse(String response, boolean sound) {
         if (response == null) {
-            response = "null";
+            //response = "null"; //debug
+            return;
         }
         responses.add(response);
         if (currentActivity != null) {

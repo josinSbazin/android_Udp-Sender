@@ -109,9 +109,9 @@ public class MainService extends Service {
     }
 
     private void onResponse(String response, boolean sound) {
-//        if (application != null) {
-//            application.addResponse(response, sound);
-//        }
+        if (application != null) {
+            application.addResponse(response, sound);
+        }
 
         if (sound) {
             sendNotification(response);
@@ -146,6 +146,6 @@ public class MainService extends Service {
                 .setPriority(Notification.PRIORITY_MAX)
                 .build();
 
-        notificationManager.notify(NOTIFY_ID, notification);
+        startForeground(Constants.NOTIFY_ID, notification);
     }
 }
