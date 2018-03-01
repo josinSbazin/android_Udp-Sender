@@ -132,9 +132,6 @@ public class MainService extends Service {
            am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         }
 
-        am.cancel(contentIntent);
         am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, contentIntent);
-
-
     }
 }

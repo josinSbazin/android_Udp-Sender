@@ -36,6 +36,10 @@ public class NotificationReceiver extends BroadcastReceiver {
         PendingIntent contentIntent = PendingIntent.getActivity(
                 context, 0, intentNotification, PendingIntent.FLAG_CANCEL_CURRENT);
 
+        if(response == null) {
+            response = "null";
+        }
+
         Notification notification = builder.setContentIntent(contentIntent)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle("Получен Response")
@@ -45,6 +49,6 @@ public class NotificationReceiver extends BroadcastReceiver {
                 .setPriority(Notification.PRIORITY_MAX)
                 .build();
 
-        notification.notify();
+        nm.notify(Constants.NOTIFY_ID, notification);
     }
 }
