@@ -2,6 +2,7 @@ package com.app.ganzara.udpsender;
 
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -23,14 +24,15 @@ import com.app.ganzara.udpsender.model.UDPHelper;
 
 import java.io.IOException;
 
-import static com.app.ganzara.udpsender.Constants.NOTIFY_ID;
-
 public class MainService extends Service {
 
     private static final String LOG_TAG = "SERVICE";
     private MainApplication application;
     private UDPHelper udp;
     private Thread work;
+
+    private NotificationManager nm;
+    private AlarmManager am;
 
     public Handler handler;
 
@@ -119,33 +121,20 @@ public class MainService extends Service {
     }
 
     private void sendNotification(String response) {
-        Intent notificationIntent = new Intent(this, MainActivity.class);
-        PendingIntent contentIntent = PendingIntent.getActivity(this,
-                0, notificationIntent,
+        Intent intent = new Intent(this, NotificationReceiver.class);
+        intent.putExtra(Constants.MESSAGE_KEY, response);
+
+        PendingIntent contentIntent = PendingIntent.getBroadcast(this,
+                0, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
-        NotificationCompat.Builder builder;
-
-        if (Build.VERSION.SDK_INT < 26) {
-            builder = new NotificationCompat.Builder(this);
-        } else {
-            NotificationChannel notificationChannel = new NotificationChannel("defaultId", "default", NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(notificationChannel);
-            builder = new NotificationCompat.Builder(this, "defaultId");
+        if(am == null) {
+           am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         }
 
-        Notification notification = builder.setContentIntent(contentIntent)
-                .setSmallIcon(R.drawable.ic_notification)
-                .setContentTitle("Получен Response")
-                .setContentText(response)
-                .setDefaults(Notification.DEFAULT_SOUND |
-                        Notification.DEFAULT_VIBRATE)
-                .setPriority(Notification.PRIORITY_MAX)
-                .build();
+        am.cancel(contentIntent);
+        am.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis() + 1000, contentIntent);
 
-        startForeground(Constants.NOTIFY_ID, notification);
+
     }
 }
