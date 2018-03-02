@@ -1,21 +1,19 @@
 package com.app.ganzara.udpsender;
 
-import android.app.Application;
+import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
+import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
+import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
 import com.app.ganzara.udpsender.model.Validation;
-
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -40,10 +38,23 @@ public class MainActivity extends AppCompatActivity {
         cbSound = findViewById(R.id.cb_sound);
         listView = findViewById(R.id.lv_responses);
 
-        ((MainApplication)getApplication()).currentActivity = this;
+        ((MainApplication) getApplication()).currentActivity = this;
 
-        adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, ((MainApplication)getApplication()).getResponses());
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, ((MainApplication) getApplication()).getResponses());
         listView.setAdapter(adapter);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.M) {
+            @SuppressLint("BatteryLife") Intent intent = new
+                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                    Uri.parse("package:" + getPackageName()));
+            startActivity(intent);
+        }
 
     }
 

@@ -2,13 +2,16 @@ package com.app.ganzara.udpsender;
 
 
 import android.annotation.SuppressLint;
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,8 +27,6 @@ import com.app.ganzara.udpsender.model.UDPHelper;
 
 import java.io.IOException;
 
-import static com.app.ganzara.udpsender.Constants.NOTIFY_ID;
-
 public class MainService extends Service {
 
     private static final String LOG_TAG = "SERVICE";
@@ -33,12 +34,33 @@ public class MainService extends Service {
     private UDPHelper udp;
     private Thread work;
 
+    private NotificationManager nm;
+    private AlarmManager am;
+
+    private final BroadcastReceiver receiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String response = intent.getStringExtra(Constants.MESSAGE_KEY);
+            if (response == null) {
+                return;
+            }
+
+            sendNotification(response);
+        }
+    };
+
     public Handler handler;
 
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    @Override
+    public void onCreate() {
+        IntentFilter filter = new IntentFilter();
+        registerReceiver(receiver, filter);
     }
 
     @SuppressLint("HandlerLeak")
@@ -107,6 +129,7 @@ public class MainService extends Service {
         Log.d(LOG_TAG, "service destroy");
         super.onDestroy();
         if (work != null) work.interrupt();
+        unregisterReceiver(receiver);
     }
 
     private void onResponse(String response, boolean sound) {
@@ -115,7 +138,29 @@ public class MainService extends Service {
         }
 
         if (sound) {
-            sendNotification(response);
+            onResponseWithNotification(response);
+        }
+    }
+
+    private void onResponseWithNotification(String response) {
+        if (response == null) {
+            return;
+        }
+
+        if (nm == null) {
+            nm = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        }
+
+        sendNotification(response);
+
+        if (am == null) {
+            am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+
+            //double kill
+            sendAlarm(response);
         }
     }
 
@@ -125,16 +170,13 @@ public class MainService extends Service {
                 0, notificationIntent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
-        NotificationManager notificationManager =
-                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
-
         NotificationCompat.Builder builder;
 
         if (Build.VERSION.SDK_INT < 26) {
             builder = new NotificationCompat.Builder(this);
         } else {
             NotificationChannel notificationChannel = new NotificationChannel("defaultId", "default", NotificationManager.IMPORTANCE_DEFAULT);
-            notificationManager.createNotificationChannel(notificationChannel);
+            nm.createNotificationChannel(notificationChannel);
             builder = new NotificationCompat.Builder(this, "defaultId");
         }
 
@@ -147,9 +189,21 @@ public class MainService extends Service {
                 .setPriority(Notification.PRIORITY_MAX)
                 .build();
 
-        startForeground(Constants.NOTIFY_ID, notification);
         PowerManager pm = (PowerManager) getApplication().getSystemService(Context.POWER_SERVICE);
         PowerManager.WakeLock wl = pm.newWakeLock(PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP, "TAG");
         wl.acquire(15000);
+
+        startForeground(Constants.NOTIFY_ID, notification);
+    }
+
+    @SuppressLint("NewApi")
+    private void sendAlarm(String resonse) {
+        Intent broadcastIntent = new Intent(this, receiver.getClass());
+        broadcastIntent.putExtra(Constants.MESSAGE_KEY, resonse);
+
+        PendingIntent contentIntent = PendingIntent.getBroadcast(this, 0, broadcastIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT);
+
+        am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), contentIntent);
     }
 }
